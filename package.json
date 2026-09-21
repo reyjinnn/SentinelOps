@@ -1,0 +1,32 @@
+{
+  "name": "sentinelops-ai",
+  "version": "1.0.0",
+  "description": "Universal Omnichannel Reverse Logistics & Autonomous Dispute Arbitrator Middleware",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "bullmq": "^5.15.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.27.0",
+    "ioredis": "^5.4.1",
+    "kysely": "^0.27.3",
+    "pg": "^8.11.5",
+    "uuid": "^14.0.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/pg": "^8.11.6",
+    "@types/uuid": "^11.0.0",
+    "tsx": "^4.10.5",
+    "typescript": "^5.4.5",
+    "vitest": "^5.0.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
