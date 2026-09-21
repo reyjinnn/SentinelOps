@@ -11,8 +11,22 @@ import { v4 as uuidv4 } from 'uuid';
 const connection = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
 });
+const redisPub = new Redis(env.REDIS_URL);
 
 const dossierGenerator = new DossierGeneratorService();
+
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+const emitStream = async (disputeId: string, step: string, message: string, payload?: any) => {
+  const channel = `dispute:events:${disputeId}`;
+  const data = JSON.stringify({
+    timestamp: new Date().toISOString(),
+    step,
+    message,
+    ...payload
+  });
+  await redisPub.publish(channel, data);
+};
 
 export function startDisputeWorker() {
   const worker = new Worker('dispute-evaluation-queue', async (job: Job<CanonicalDisputeEvent>) => {
@@ -20,13 +34,26 @@ export function startDisputeWorker() {
     console.log(`[Worker] Starting evaluation for event: ${event.event_id}`);
 
     try {
+      await emitStream(event.dispute_id, 'INGESTED', 'Event payload validated and normalized');
+      await delay(300);
+
       // 1. AI Forensic Sensor Evaluation
       const aiResult = await ForensicSensorService.evaluateEvidence(event);
       console.log(`[Worker] AI Evaluation complete. Fraud Risk: ${aiResult.fraud_risk_score}`);
+      await emitStream(event.dispute_id, 'VISION_AI', `OpenAI GPT-4o analysis completed (Fraud Risk: ${aiResult.fraud_risk_score}/100)`);
+      await delay(300);
 
       // 2. Deterministic Decision Engine
       const decision = DecisionEngineService.evaluate(event, aiResult);
       console.log(`[Worker] Decision reached: ${decision.decision_lane}`);
+
+      const deltaW = Math.abs(event.evidence.catalog_weight_grams - event.logistics.driver_handover_weight_grams);
+      const deviationRatio = event.evidence.catalog_weight_grams > 0 ? (deltaW / event.evidence.catalog_weight_grams) : 0;
+      await emitStream(event.dispute_id, 'TELEMETRY_SYNC', `Courier weight cross-matched (Delta: ${deltaW}g, Dev: ${(deviationRatio*100).toFixed(1)}%)`);
+      await delay(300);
+
+      await emitStream(event.dispute_id, 'DETERMINISTIC_MATRIX', `Rule activated: ${decision.triggered_rule}`);
+      await delay(300);
 
       let dossierContent = '';
       let dossierNumber = `DOSSIER-${event.order.order_id.substring(0, 8).toUpperCase()}`;
@@ -158,6 +185,13 @@ export function startDisputeWorker() {
       });
 
       console.log(`[Worker] Evaluation successfully saved for event: ${event.event_id}`);
+      
+      await emitStream(event.dispute_id, 'DECISION_FINAL', `Evaluation complete. Pipeline closed.`, {
+        decision: {
+          ...decision,
+          dossier: dossierContent
+        }
+      });
 
     } catch (error) {
       console.error(`[Worker] Failed to process event ${event.event_id}:`, error);

@@ -1,6 +1,8 @@
 import Fastify from 'fastify';
+import cors from '@fastify/cors';
 import { env } from './config/env';
 import { ingestionRoutes } from './routes/ingestion.route';
+import { streamRoutes } from './routes/stream.route';
 
 import { startDisputeWorker } from './workers/dispute.worker';
 
@@ -8,7 +10,14 @@ const fastify = Fastify({
   logger: true,
 });
 
+fastify.register(cors, {
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true
+});
+
 fastify.register(ingestionRoutes);
+fastify.register(streamRoutes);
 
 const start = async () => {
   try {

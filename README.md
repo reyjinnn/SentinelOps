@@ -6,10 +6,11 @@ SentinelOps AI adalah platform B2B SaaS Middleware berbasis *Event-Driven Archit
 
 ## Tech Stack
 - **Runtime**: Node.js 20+ LTS / TypeScript 5.x
-- **Framework**: Fastify
+- **Framework**: Fastify (Backend) / React 18 & Vite (Frontend)
 - **Database**: PostgreSQL 16 (dengan Kysely Query Builder)
 - **Queue & Cache**: Redis 7 + BullMQ
-- **Validation**: Zod v3+
+- **AI Integration**: OpenAI GPT-4o Vision + Zod Structured Outputs
+- **State & Real-time**: Zustand, Server-Sent Events (SSE)
 - **Testing**: Vitest
 
 ## Step-by-Step Technical Setup
@@ -41,14 +42,23 @@ Untuk memverifikasi container berjalan dengan baik:
 docker-compose ps
 ```
 
-### 4. Menjalankan Server Development
-Jalankan Fastify dalam mode *watch* menggunakan `tsx`:
+### 4. Menjalankan Server Development (Backend)
+Jalankan Fastify dalam mode *watch* menggunakan `tsx` dari *root directory*:
 ```bash
 pnpm run dev
 ```
 Server akan mengikat pada alamat `0.0.0.0` dan *port* sesuai dengan isi konfigurasi `.env` (default `9000`).
 
-### 5. Pengujian Unit (Unit Testing)
+### 5. Menjalankan Operations Cockpit (Frontend)
+Masuk ke direktori `frontend/` dan jalankan Vite server:
+```bash
+cd frontend
+pnpm install
+pnpm run dev
+```
+Buka browser di `http://localhost:5173` untuk mengakses dasbor real-time.
+
+### 6. Pengujian Unit (Unit Testing)
 Jalankan *test suite* yang memverifikasi *HMAC signature*, validasi Zod, dan logika *Idempotency lock* dari BullMQ/Redis:
 ```bash
 pnpm test

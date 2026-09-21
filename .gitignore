@@ -7,3 +7,7 @@ coverage
 # Docker
 postgres_data
 redis_data
+
+# Frontend
+frontend/node_modules
+frontend/dist
