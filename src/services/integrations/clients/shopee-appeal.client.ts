@@ -21,7 +21,7 @@ export class ShopeeAppealClient {
     
     // In MVP/Test mode, we mock the API response to avoid real network calls
     // and avoid dealing with complex live OAuth sandboxes.
-    if (env.TEST_MODE === 'true' || process.env.NODE_ENV !== 'production') {
+    if (env.TEST_MODE || process.env.NODE_ENV !== 'production') {
       console.log(`[Shopee Client] Mocking appeal submission for store ${externalStoreId}, dispute ${disputeId}`);
       
       // Simulate network latency (200ms)

@@ -15,7 +15,7 @@ export class TiktokAppealClient {
   ): Promise<AppealSubmissionResult> {
     
     // In MVP/Test mode, we mock the API response
-    if (env.TEST_MODE === 'true' || process.env.NODE_ENV !== 'production') {
+    if (env.TEST_MODE || process.env.NODE_ENV !== 'production') {
       console.log(`[TikTok Client] Mocking appeal submission for store ${externalStoreId}, dispute ${disputeId}`);
       
       // Simulate network latency (200ms)
