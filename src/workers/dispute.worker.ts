@@ -75,6 +75,8 @@ export function startDisputeWorker() {
         dossierContent = dossierGenerator.generate(event, aiResult, decision);
       }
 
+      let finalDisputeId = '';
+
       // 4. Database Persistence (Transaction)
       await db.transaction().execute(async (trx) => {
         
@@ -126,6 +128,8 @@ export function startDisputeWorker() {
           .where('dispute_code', '=', `DSP-${event.event_id.split('-')[0].toUpperCase()}`)
           .select('id')
           .executeTakeFirstOrThrow();
+
+        finalDisputeId = disputeRecord.id;
 
         // Insert Telemetry
         const deltaW = Math.abs(event.evidence.catalog_weight_grams - event.logistics.driver_handover_weight_grams);
@@ -204,6 +208,13 @@ export function startDisputeWorker() {
           dossier: dossierContent
         }
       });
+
+      // --- SPRINT 5: Trigger Appeal Worker ---
+      if (decision.decision_lane === 'RED_ESCROW_FROZEN' && finalDisputeId) {
+        const { appealSubmissionQueue } = await import('./appeal-submit.worker');
+        await appealSubmissionQueue.add('submit-appeal', { disputeId: finalDisputeId });
+        console.log(`[Worker] Dispute ${finalDisputeId} enqueued for Auto-Appeal Submission.`);
+      }
 
     } catch (error) {
       console.error(`[Worker] Failed to process event ${event.event_id}:`, error);

@@ -13,6 +13,8 @@ export interface FinalDecision {
   triggered_rule: string;
   loss_prevented_idr: number;
   dossier?: string;
+  external_appeal_id?: string;
+  appeal_status?: 'QUEUED' | 'SUBMITTED' | 'WON' | 'LOST';
 }
 
 interface CockpitState {
@@ -30,6 +32,7 @@ interface CockpitState {
   setIsEvaluating: (evaluating: boolean) => void;
   addLog: (log: LogEntry) => void;
   setFinalDecision: (decision: FinalDecision) => void;
+  setAppealStatus: (status: 'QUEUED' | 'SUBMITTED' | 'WON' | 'LOST', externalAppealId?: string) => void;
   resetAudit: () => void;
 }
 
@@ -48,5 +51,12 @@ export const useCockpitStore = create<CockpitState>((set) => ({
   setIsEvaluating: (val) => set({ isEvaluating: val }),
   addLog: (log) => set((state) => ({ streamingLogs: [...state.streamingLogs, log] })),
   setFinalDecision: (decision) => set({ finalDecision: decision, lossPreventedIdr: decision.loss_prevented_idr }),
+  setAppealStatus: (status, externalAppealId) => set((state) => ({
+    finalDecision: state.finalDecision ? {
+      ...state.finalDecision,
+      appeal_status: status,
+      ...(externalAppealId && { external_appeal_id: externalAppealId })
+    } : null
+  })),
   resetAudit: () => set({ streamingLogs: [], finalDecision: null, lossPreventedIdr: 0, isEvaluating: false })
 }));

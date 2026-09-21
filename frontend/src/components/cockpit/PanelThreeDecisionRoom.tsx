@@ -63,10 +63,39 @@ export function PanelThreeDecisionRoom() {
           </div>
 
           <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Loss Prevented</span>
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+              {finalDecision.appeal_status === 'WON' ? 'Escrow Recovered' : 'Loss Prevented'}
+            </span>
             <span className="text-2xl font-bold text-emerald-400">{formatIDR(finalDecision.loss_prevented_idr)}</span>
           </div>
         </div>
+
+        {/* Sprint 5: Appeal Status Timeline */}
+        {finalDecision.decision_lane === 'RED_ESCROW_FROZEN' && (
+          <div className="flex flex-col gap-2 bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Appeal Status Timeline</span>
+              {finalDecision.external_appeal_id && (
+                <span className="text-xs font-mono text-zinc-300 bg-zinc-800 px-2 py-1 rounded">
+                  ID: {finalDecision.external_appeal_id}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center text-sm gap-2 mt-2">
+              <span className={`px-2 py-1 rounded-md text-xs font-bold ${finalDecision.appeal_status ? 'bg-emerald-500/20 text-emerald-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                1. EVALUATED
+              </span>
+              <span className="text-zinc-600">→</span>
+              <span className={`px-2 py-1 rounded-md text-xs font-bold ${(finalDecision.appeal_status === 'SUBMITTED' || finalDecision.appeal_status === 'WON' || finalDecision.appeal_status === 'LOST') ? 'bg-sky-500/20 text-sky-400' : (finalDecision.appeal_status === 'QUEUED' ? 'bg-amber-500/20 text-amber-400 animate-pulse' : 'bg-zinc-800 text-zinc-500')}`}>
+                2. {finalDecision.appeal_status === 'QUEUED' ? 'AUTO-FILING...' : 'SUBMITTED'}
+              </span>
+              <span className="text-zinc-600">→</span>
+              <span className={`px-2 py-1 rounded-md text-xs font-bold ${finalDecision.appeal_status === 'WON' ? 'bg-emerald-500/20 text-emerald-400' : finalDecision.appeal_status === 'LOST' ? 'bg-rose-500/20 text-rose-400' : 'bg-zinc-800 text-zinc-500'}`}>
+                3. {finalDecision.appeal_status === 'WON' ? 'WON (FUNDS RECOVERED)' : finalDecision.appeal_status === 'LOST' ? 'LOST' : 'UNDER REVIEW'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Dossier Section */}
         {finalDecision.dossier && (

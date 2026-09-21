@@ -20,7 +20,23 @@ export function useDisputeStream(disputeId: string | null) {
           if (data.step === 'DECISION_FINAL' && data.decision) {
             setFinalDecision(data.decision);
             setIsEvaluating(false);
-            eventSourceRef.current?.close();
+            
+            // Only close the stream if it's not RED_ESCROW_FROZEN.
+            // RED_ESCROW_FROZEN will expect APPEAL_SUBMITTED_SUCCESS and RESOLUTION_OUTCOME events later.
+            if (data.decision.decision_lane !== 'RED_ESCROW_FROZEN') {
+              eventSourceRef.current?.close();
+            } else {
+              useCockpitStore.getState().setAppealStatus('QUEUED');
+            }
+          }
+
+          // Sprint 5: Handle Async Appeal Events
+          const type = (data as any).type;
+          if (type === 'APPEAL_SUBMITTED_SUCCESS') {
+            useCockpitStore.getState().setAppealStatus('SUBMITTED', (data as any).external_appeal_id);
+          } else if (type === 'RESOLUTION_OUTCOME') {
+            useCockpitStore.getState().setAppealStatus((data as any).outcome, (data as any).external_appeal_id);
+            eventSourceRef.current?.close(); // Finally close stream when resolved
           }
         } catch (e) {
           // heartbeat or non-json message

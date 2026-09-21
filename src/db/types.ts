@@ -5,7 +5,7 @@ export type UserRole = 'SUPER_ADMIN' | 'TENANT_ADMIN' | 'OPS_ANALYST' | 'VIEWER'
 export type Marketplace = 'SHOPEE' | 'TIKTOK_SHOP' | 'TOKOPEDIA' | 'LAZADA' | 'SHOPIFY' | 'CUSTOM_API';
 export type CourierCode = 'SPX_EXPRESS' | 'JNT_EXPRESS' | 'SICEPAT' | 'ANTERAJA' | 'JNE' | 'NINJA_VAN' | 'OTHER';
 export type EscrowStatus = 'HELD_IN_ESCROW' | 'RELEASED_TO_SELLER' | 'REFUNDED_TO_BUYER' | 'FROZEN';
-export type DisputeStatus = 'INGESTED' | 'EVALUATING' | 'AUTO_REFUND' | 'ESCROW_FROZEN' | 'ESCALATE_HUMAN' | 'APPEAL_SUBMITTED' | 'RESOLVED';
+export type DisputeStatus = 'INGESTED' | 'EVALUATING' | 'AUTO_REFUND' | 'ESCROW_FROZEN' | 'ESCALATE_HUMAN' | 'APPEAL_SUBMITTED' | 'RESOLVED_WON' | 'RESOLVED_LOST';
 
 export type RecommendedPosture = 'LOW_RISK' | 'SUSPICIOUS' | 'HIGH_CERTAINTY_FRAUD';
 export type DecisionLane = 'GREEN_AUTO_REFUND' | 'RED_ESCROW_FROZEN' | 'YELLOW_ESCALATE_HUMAN';
@@ -103,6 +103,8 @@ export interface DisputeDossiersTable {
   marketplace_policy_applied: string;
   markdown_content: string;
   pdf_storage_url: string | null;
+  submitted_at: Date | null;
+  external_appeal_id: string | null;
   generated_at: Generated<Date>;
 }
 

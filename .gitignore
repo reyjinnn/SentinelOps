@@ -11,3 +11,8 @@ redis_data
 # Frontend
 frontend/node_modules
 frontend/dist
+
+# Documentation
+*.md
+!README.md
+!frontend/README.md
