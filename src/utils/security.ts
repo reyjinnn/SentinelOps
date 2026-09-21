@@ -60,15 +60,16 @@ export function maskPII(text: string): string {
   let masked = text;
   
   // Mask typical phone numbers (10 to 14 digits)
-  // Matches e.g., 08123456789, +6281234567890
-  masked = masked.replace(/(\+?62|0)(8\d{2})(\d{4,6})(\d{3,4})/g, (match, p1, p2, p3, p4) => {
+  // Use non-greedy or exact length where possible to ensure last 4 digits are kept if length allows
+  masked = masked.replace(/(\+?62|0)(8\d)(\d+)(\d{4})/g, (match, p1, p2, p3, p4) => {
     return `${p1}${p2}${'*'.repeat(p3.length)}${p4}`;
   });
 
   // Mask names (very naive implementation for demonstration, assumes 2+ words starting with capital letters)
-  masked = masked.replace(/\b([A-Z][a-z]+)\b/g, (match) => {
-    if (match.length <= 2) return match;
-    return match[0] + '*'.repeat(match.length - 1);
+  // We'll require at least two adjacent capitalized words to avoid masking random words at the start of a sentence.
+  masked = masked.replace(/\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b/g, (match, p1, p2) => {
+    const maskWord = (w: string) => w.length > 2 ? w[0] + '*'.repeat(w.length - 1) : w;
+    return `${maskWord(p1)} ${maskWord(p2)}`;
   });
 
   return masked;

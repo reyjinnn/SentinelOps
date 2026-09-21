@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "vitest run",
+    "test:unit": "vitest run tests/unit/",
     "test:e2e": "vitest run tests/e2e-scenarios.test.ts",
     "demo:seed": "tsx scripts/demo-seed.ts"
   },
