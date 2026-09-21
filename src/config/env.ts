@@ -10,6 +10,8 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   SHOPEE_WEBHOOK_SECRET: z.string(),
   TIKTOK_WEBHOOK_SECRET: z.string(),
+  TEST_MODE: z.coerce.boolean().default(false),
+  ENCRYPTION_MASTER_KEY: z.string().length(32).default('12345678901234567890123456789012'),
 });
 
 const _env = envSchema.safeParse(process.env);

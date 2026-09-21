@@ -7,10 +7,14 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "vitest run tests/e2e-scenarios.test.ts",
+    "demo:seed": "tsx scripts/demo-seed.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",
+    "@fastify/helmet": "^13.1.1",
+    "@fastify/rate-limit": "^11.2.0",
     "bullmq": "^5.15.0",
     "dotenv": "^16.4.5",
     "fastify": "^4.27.0",
@@ -24,7 +28,10 @@
   "devDependencies": {
     "@types/node": "^20.12.12",
     "@types/pg": "^8.11.6",
+    "@types/supertest": "^7.2.1",
     "@types/uuid": "^11.0.0",
+    "autocannon": "^8.0.0",
+    "supertest": "^7.2.2",
     "tsx": "^4.10.5",
     "typescript": "^5.4.5",
     "vitest": "^5.0.1"

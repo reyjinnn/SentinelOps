@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinel_postgres_prod
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-sentinelops}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-sentinelops}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel_redis_prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_prod:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: sentinel_backend_prod
+    ports:
+      - "9000:9000"
+    environment:
+      - PORT=9000
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-sentinelops}
+      - REDIS_URL=redis://redis:6379
+      - SHOPEE_WEBHOOK_SECRET=${SHOPEE_WEBHOOK_SECRET:-shopee-secret}
+      - TIKTOK_WEBHOOK_SECRET=${TIKTOK_WEBHOOK_SECRET:-tiktok-secret}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TEST_MODE=${TEST_MODE:-false}
+      - ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY:-12345678901234567890123456789012}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sentinel_frontend_prod
+    ports:
+      - "5173:80" # Exposed to localhost:5173 to match the dev environment instructions, mapping to nginx 80
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:

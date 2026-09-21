@@ -1,5 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import { env } from './config/env';
 import { ingestionRoutes } from './routes/ingestion.route';
 import { streamRoutes } from './routes/stream.route';
@@ -8,6 +10,12 @@ import { startDisputeWorker } from './workers/dispute.worker';
 
 const fastify = Fastify({
   logger: true,
+});
+
+fastify.register(helmet);
+fastify.register(rateLimit, {
+  max: 100,
+  timeWindow: '1 minute'
 });
 
 fastify.register(cors, {

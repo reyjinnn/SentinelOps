@@ -7,6 +7,7 @@ import { DecisionEngineService } from '../services/decision-engine.service';
 import { DossierGeneratorService } from '../services/legal/dossier-generator.service';
 import { db } from '../db/database';
 import { v4 as uuidv4 } from 'uuid';
+import { maskPII } from '../utils/security';
 
 const connection = new Redis(env.REDIS_URL, {
   maxRetriesPerRequest: null,
@@ -19,11 +20,22 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 const emitStream = async (disputeId: string, step: string, message: string, payload?: any) => {
   const channel = `dispute:events:${disputeId}`;
+  
+  // Mask PII in messages and payloads (UU PDP)
+  const maskedMessage = maskPII(message);
+  let finalPayload = payload;
+  
+  if (payload && payload.decision && payload.decision.dossier) {
+    // Deep clone and mask dossier
+    finalPayload = JSON.parse(JSON.stringify(payload));
+    finalPayload.decision.dossier = maskPII(finalPayload.decision.dossier);
+  }
+
   const data = JSON.stringify({
     timestamp: new Date().toISOString(),
     step,
-    message,
-    ...payload
+    message: maskedMessage,
+    ...finalPayload
   });
   await redisPub.publish(channel, data);
 };

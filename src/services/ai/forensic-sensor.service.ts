@@ -38,8 +38,8 @@ export class ForensicSensorService {
       - Evidence URLs: ${event.evidence.proof_image_urls.join(', ') || 'None'}
     `;
 
-    // For testing/mocking when no API key is provided, avoid actual API calls to save costs/errors
-    if (!env.OPENAI_API_KEY || env.OPENAI_API_KEY === 'sk-mock-key') {
+    // For testing/mocking when TEST_MODE is true or no API key is provided
+    if (env.TEST_MODE || !env.OPENAI_API_KEY || env.OPENAI_API_KEY === 'sk-mock-key') {
       return this.mockEvaluation(event);
     }
 
