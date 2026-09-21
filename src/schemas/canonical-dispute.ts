@@ -40,6 +40,8 @@ export const CanonicalDisputeEventSchema = z.object({
   }),
   customer: z.object({
     user_id: z.string(),
+    customer_name: z.string().optional(),
+    customer_phone: z.string().optional(),
     account_age_days: z.number().int().nonnegative().default(0),
     historical_return_count: z.number().int().nonnegative().default(0),
     historical_order_count: z.number().int().nonnegative().default(0),

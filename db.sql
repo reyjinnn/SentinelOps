@@ -63,7 +63,8 @@ DO $$ BEGIN
         'ESCROW_FROZEN',
         'ESCALATE_HUMAN',
         'APPEAL_SUBMITTED',
-        'RESOLVED'
+        'RESOLVED_WON',
+        'RESOLVED_LOST'
     );
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
@@ -305,6 +306,8 @@ CREATE TABLE IF NOT EXISTS dispute_dossiers (
     marketplace_policy_applied VARCHAR(120) NOT NULL,
     markdown_content TEXT NOT NULL,
     pdf_storage_url TEXT,
+    submitted_at TIMESTAMPTZ,
+    external_appeal_id VARCHAR(100),
     generated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
